@@ -20,16 +20,18 @@ function ImageGallery({ search, page, changePage }) {
     if (!search) {
       return;
     }
+    console.log(searchResults);
     setStatus('pending');
     axios(`${url}?q=${search}&page=${page}&key=${API_KEY}${options}`).then(
       ({ data }) => {
         setSearchResults(
           page > 1 ? [...searchResults, ...data.hits] : data.hits
         );
-        setStatus('resolved');
         page === 1 && setTotalPages(Math.ceil(data.totalHits / 12));
+        setStatus('resolved');
       }
     );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [search, page, options, API_KEY, url]);
 
   const loadMore = () => {
