@@ -30,7 +30,7 @@ function ImageGallery({ search, page, changePage }) {
         page === 1 && setTotalPages(Math.ceil(data.totalHits / 12));
       }
     );
-  }, [search, page]);
+  }, [search, page, options, API_KEY, url]);
 
   const loadMore = () => {
     changePage(page + 1);
