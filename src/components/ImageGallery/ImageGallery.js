@@ -1,96 +1,85 @@
 import PropTypes from 'prop-types';
-import React from 'react';
-import axios from "axios";
-import s from './ImageGallery.module.css'
+import { useState, useEffect } from 'react';
+import axios from 'axios';
+import s from './ImageGallery.module.css';
 import ImageGalleryItem from './ImageGalleryItem';
 import Loader from 'components/Loader';
 import Button from 'components/Button';
 import Modal from 'components/Modal';
 import { axiosCongif } from 'config/axiosConfig';
 
-const { API_KEY, url, options } = axiosCongif;
+function ImageGallery({ search, page, changePage }) {
+  const { API_KEY, url, options } = axiosCongif;
+  const [searchResults, setSearchResults] = useState([]);
+  const [status, setStatus] = useState('idle');
+  const [showModal, setShowModal] = useState(false);
+  const [modalUrl, setModalUrl] = useState('');
+  const [totalPages, setTotalPages] = useState(0);
 
-
-
-class ImageGallery extends React.Component {
-    state = {
-        searchResults: [],
-        page: 1,
-        status: 'idle',
-        showModal: false,
-        modalUrl: '',
-        totalpages: 0,
+  useEffect(() => {
+    if (!search) {
+      return;
     }
+    setStatus('pending');
+    axios(`${url}?q=${search}&page=${page}&key=${API_KEY}${options}`).then(
+      ({ data }) => {
+        setSearchResults(
+          page > 1 ? [...searchResults, ...data.hits] : data.hits
+        );
+        setStatus('resolved');
+        page === 1 && setTotalPages(Math.ceil(data.totalHits / 12));
+      }
+    );
+  }, [search, page]);
 
+  const loadMore = () => {
+    changePage(page + 1);
+  };
 
-    componentDidUpdate(prevProps, prevState) {
-        if (this.state.page > prevState.page) {
-            this.setState({ status: 'pending' })
-            axios(`${url}?q=${this.props.search}&page=${this.state.page}&key=${API_KEY}${options}`).then(({ data }) => this.setState((prevState) => ({ searchResults: [...prevState.searchResults, ...data.hits], status: 'resolved' })))
-             
-        }
-        if (this.props.search !== prevProps.search) {
-            this.setState({ searchResults: [], page: 1, })
-            this.setState({ status: 'pending' })
-            axios(`${url}?q=${this.props.search}&page=1&key=${API_KEY}${options}`).then(({ data }) => this.setState({ searchResults: data.hits, status: 'resolved',totalpages: Math.ceil(data.totalHits/12) }))
-        
-        }
-        window.scrollTo({
-        top: document.body.scrollHeight,
-        behavior: 'smooth'
-        })
-        
-       
-    }
+  const openModal = url => {
+    setModalUrl(url);
+    setShowModal(!showModal);
+  };
 
+  const handleToggleModal = () => {
+    setShowModal(!showModal);
+  };
 
-    
-
-    loadMore = () => {
-       
-        this.setState((prevState) => {
-            return {
-                page: prevState.page + 1
-            };
-        });
-     
-    };
-
-    openModal = url => {
-        this.setState({
-            showModal: !this.state.showModal,
-            modalUrl: url
-        });
-        
-    }
-
-    handleToggleModal = () => {
-        this.setState({ showModal: !this.state.showModal });
-    }
-
-    render() {
-       return <>
-            
-             <>
-                <ul className={s.gallery}>
-                    {this.state.searchResults.map(({ id, webformatURL, largeImageURL }) => {
-                        return <li key={id} className={s.item}>
-                            <ImageGalleryItem url={webformatURL} data={largeImageURL} onClick={this.openModal} />
-                        </li>
-                    })}
-                </ul>
-                {this.state.showModal && <Modal onCloseRequest={this.handleToggleModal}> <img src={this.state.modalUrl} alt="" /> </Modal>}
-           </>
-           {this.state.status === 'resolved' && this.state.page !== this.state.totalpages && <Button loadMore={this.loadMore} />}
-           {this.state.status === 'pending' && <Loader />}
-        </>
-        
-    }
+  return (
+    <>
+      <>
+        <ul className={s.gallery}>
+          {searchResults.map(({ id, webformatURL, largeImageURL }) => {
+            return (
+              <li key={id} className={s.item}>
+                <ImageGalleryItem
+                  url={webformatURL}
+                  data={largeImageURL}
+                  onClick={openModal}
+                />
+              </li>
+            );
+          })}
+        </ul>
+        {showModal && (
+          <Modal onCloseRequest={handleToggleModal}>
+            {' '}
+            <img src={modalUrl} alt="" />{' '}
+          </Modal>
+        )}
+      </>
+      {status === 'resolved' && page !== totalPages && (
+        <Button loadMore={loadMore} />
+      )}
+      {status === 'pending' && <Loader />}
+    </>
+  );
 }
+
 ImageGallery.propTypes = {
-    search: PropTypes.string.isRequired,
+  search: PropTypes.string.isRequired,
+  page: PropTypes.number.isRequired,
+  changePage: PropTypes.func.isRequired,
+};
 
-} 
-
-
-export default ImageGallery
+export default ImageGallery;
