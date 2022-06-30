@@ -1,0 +1,36 @@
+.searhbar{
+    background-color: blue;
+    height: 50px;
+    padding: 10px;
+}
+.form{
+    margin: 0 auto;
+    width: fit-content;
+    position: relative;
+    
+}
+.input{
+    height: 30px;
+    border-radius: 15px;
+    padding-left: 15px;
+    border: none;
+    min-width: 320px;
+}
+.input:focus{
+    outline: 2px solid black;
+}
+.button{
+    position: absolute;
+    right: 0;
+    border-radius: 15px;
+    height: 30px;
+        padding-right: 10px;
+        border: none;
+        cursor: pointer;
+        min-width: 100px;
+        
+}
+.button:hover{
+    color: #fff;
+    background-color: rgb(163, 161, 161);
+}
