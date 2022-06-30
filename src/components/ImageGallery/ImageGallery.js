@@ -20,7 +20,6 @@ function ImageGallery({ search, page, changePage }) {
     if (!search) {
       return;
     }
-    console.log(searchResults);
     setStatus('pending');
     axios(`${url}?q=${search}&page=${page}&key=${API_KEY}${options}`).then(
       ({ data }) => {
