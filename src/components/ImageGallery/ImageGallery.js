@@ -30,6 +30,14 @@ function ImageGallery({ search, page, changePage }) {
         setStatus('resolved');
       }
     );
+    setTimeout(
+      () =>
+        window.scrollTo({
+          top: document.body.scrollHeight,
+          behavior: 'smooth',
+        }),
+      400
+    );
   }, [search, page, options, API_KEY, url]);
 
   const loadMore = () => {
@@ -46,7 +54,7 @@ function ImageGallery({ search, page, changePage }) {
   };
 
   return (
-    <>
+    <div>
       <>
         <ul className={s.gallery}>
           {searchResults.map(({ id, webformatURL, largeImageURL }) => {
@@ -61,6 +69,7 @@ function ImageGallery({ search, page, changePage }) {
             );
           })}
         </ul>
+
         {showModal && (
           <Modal onCloseRequest={handleToggleModal}>
             {' '}
@@ -72,7 +81,8 @@ function ImageGallery({ search, page, changePage }) {
         <Button loadMore={loadMore} />
       )}
       {status === 'pending' && <Loader />}
-    </>
+      <div></div>
+    </div>
   );
 }
 
